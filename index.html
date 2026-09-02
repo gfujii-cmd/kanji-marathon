@@ -316,16 +316,17 @@ let drillQueue = [];
 let drillIndex = 0;
 let flipped = false;
 let storageOk = true;
+const STORAGE_KEY = 'kanji-marathon-progress';
 
 async function loadProgress(){
   try{
-    const res = await window.storage.get('kanji-marathon-progress');
-    if(res && res.value){ progress = JSON.parse(res.value); }
-  }catch(e){ /* no data yet, or storage unavailable */ }
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){ progress = JSON.parse(raw); }
+  }catch(e){ /* no data yet, or storage unavailable (e.g. private browsing) */ }
 }
 async function saveProgress(){
   try{
-    await window.storage.set('kanji-marathon-progress', JSON.stringify(progress));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
   }catch(e){ storageOk = false; }
 }
 
