@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マラソン漢字</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EADC;
+    --paper-2:#E8DFCB;
+    --ink:#241F1A;
+    --ink-soft:#4A433B;
+    --muted:#948A78;
+    --line:#D8CDB4;
+    --indigo:#2B3F63;
+    --indigo-dim:#5B6E8E;
+    --stamp:#AB3327;
+    --stamp-soft:#c96a5f;
+    --gold:#9C7A34;
+    --card-bg:#FBF7ED;
+    --shadow: 0 1px 0 rgba(36,31,26,0.06);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(36,31,26,0.05) 1px, transparent 0);
+    background-size: 14px 14px;
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:22px 18px 60px;}
+
+  /* ---- Header ---- */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px;
+    margin-bottom:18px;
+    gap:12px;
+  }
+  .brand{display:flex; align-items:baseline; gap:10px;}
+  .brand .glyph{
+    font-family:'Shippori Mincho', serif;
+    font-weight:800;
+    font-size:34px;
+    color:var(--stamp);
+    line-height:1;
+  }
+  .brand h1{
+    font-family:'Shippori Mincho', serif;
+    font-weight:600;
+    font-size:19px;
+    margin:0;
+    letter-spacing:0.02em;
+  }
+  .brand .sub{font-size:11.5px;color:var(--muted); margin-top:2px;}
+  .countdown{text-align:right;}
+  .countdown .num{font-family:'Shippori Mincho', serif; font-size:28px; font-weight:800; color:var(--indigo); line-height:1;}
+  .countdown .lbl{font-size:11px; color:var(--muted); margin-top:2px;}
+
+  /* ---- Day strip ---- */
+  .strip-wrap{margin-bottom:22px;}
+  .strip-title{font-size:12px; color:var(--muted); margin-bottom:8px; display:flex; justify-content:space-between;}
+  .strip{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding-bottom:8px;
+    scrollbar-width:thin;
+  }
+  .strip::-webkit-scrollbar{height:5px;}
+  .strip::-webkit-scrollbar-thumb{background:var(--line); border-radius:3px;}
+  .day-chip{
+    flex:0 0 auto;
+    min-width:52px;
+    border:1.5px solid var(--line);
+    background:var(--card-bg);
+    border-radius:3px;
+    padding:7px 8px 6px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s, transform .1s;
+    position:relative;
+  }
+  .day-chip:hover{border-color:var(--indigo-dim);}
+  .day-chip .n{font-size:15px; color:var(--ink); font-weight:700;}
+  .day-chip.today{border-color:var(--indigo); box-shadow: inset 0 0 0 1px var(--indigo);}
+  .day-chip.selected{background:var(--ink); border-color:var(--ink);}
+  .day-chip.selected .n{color:var(--paper);}
+  .day-chip.done::after{
+    content:"完";
+    position:absolute; top:-7px; right:-6px;
+    font-family:'Shippori Mincho', serif;
+    font-size:11px; color:#fff; background:var(--stamp);
+    width:17px;height:17px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    transform:rotate(-8deg);
+    box-shadow:0 1px 2px rgba(0,0,0,0.25);
+  }
+
+  /* ---- Day panel ---- */
+  .panel{
+    background:var(--card-bg);
+    border:1.5px solid var(--line);
+    border-radius:4px;
+    padding:18px 18px 20px;
+    margin-bottom:18px;
+  }
+  .panel-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; flex-wrap:wrap; gap:6px;}
+  .panel-head h2{font-family:'Shippori Mincho', serif; font-size:18px; margin:0; font-weight:600;}
+  .panel-head .date{font-size:12px; color:var(--muted);}
+  .progress-line{display:flex; align-items:center; gap:8px; margin-bottom:16px;}
+  .progress-track{flex:1; height:6px; background:var(--line); border-radius:3px; overflow:hidden;}
+  .progress-fill{height:100%; background:var(--stamp); border-radius:3px; transition:width .3s;}
+  .progress-num{font-size:11.5px; color:var(--ink-soft); white-space:nowrap; font-variant-numeric:tabular-nums;}
+
+  .tile-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .tile{
+    aspect-ratio:1;
+    border:1.5px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Shippori Mincho', serif;
+    font-size:26px;
+    font-weight:600;
+    position:relative;
+    color:var(--ink);
+  }
+  .tile .mark{
+    position:absolute; bottom:3px; right:4px;
+    font-size:8px; color:var(--stamp); font-family:'Zen Kaku Gothic New',sans-serif; font-weight:700;
+  }
+  .tile.mastered{background:#fff; border-color:var(--stamp); color:var(--stamp);}
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:7px;
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:12px 20px;
+    border-radius:3px;
+    border:1.5px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper);
+    cursor:pointer;
+    width:100%;
+    transition:opacity .15s, transform .1s;
+  }
+  .btn:active{transform:scale(0.98);}
+  .btn.secondary{background:transparent; color:var(--ink); border-color:var(--line);}
+  .btn.ghost{background:transparent; color:var(--muted); border:none; width:auto; padding:8px 4px; font-weight:500; font-size:12.5px;}
+  .btn:disabled{opacity:0.45; cursor:default;}
+
+  .hint{font-size:12px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5;}
+
+  /* ---- Drill overlay ---- */
+  .overlay{
+    position:fixed; inset:0; background:rgba(36,31,26,0.55);
+    display:none; align-items:center; justify-content:center; z-index:50;
+    padding:16px;
+    backdrop-filter: blur(2px);
+  }
+  .overlay.active{display:flex;}
+  .drill-box{
+    background:var(--paper); border-radius:6px; width:100%; max-width:420px;
+    padding:22px 20px 24px; position:relative;
+    border:1.5px solid var(--ink);
+  }
+  .drill-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .drill-top .lbl{font-size:12px; color:var(--muted);}
+  .close-x{cursor:pointer; font-size:13px; color:var(--muted); background:none; border:none; font-family:inherit;}
+
+  .dots{display:flex; gap:4px; justify-content:center; margin:14px 0 6px;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line);}
+  .dot.filled{background:var(--stamp);}
+
+  .flip-scene{perspective:1200px; margin:16px 0;}
+  .flip-card{
+    position:relative; width:100%; height:230px;
+    transform-style:preserve-3d; transition:transform .45s cubic-bezier(.4,.2,.2,1);
+    cursor:pointer;
+  }
+  .flip-card.flipped{transform:rotateY(180deg);}
+  .face{
+    position:absolute; inset:0; backface-visibility:hidden;
+    border-radius:5px; border:1.5px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:var(--card-bg);
+    padding:14px;
+    text-align:center;
+  }
+  .face.front .k{font-family:'Shippori Mincho', serif; font-size:96px; font-weight:600; line-height:1;}
+  .face.front .tap{position:absolute; bottom:12px; font-size:11px; color:var(--muted);}
+  .face.back{transform:rotateY(180deg); background:var(--indigo); color:var(--paper); border-color:var(--indigo);}
+  .face.back .meaning{font-size:19px; font-weight:700; margin-bottom:12px; font-family:'Shippori Mincho', serif;}
+  .face.back .reading-row{font-size:13px; margin-bottom:5px; opacity:0.92;}
+  .face.back .reading-row b{font-weight:700; opacity:0.75; margin-right:6px; font-size:11px; letter-spacing:0.04em;}
+
+  .answer-row{display:flex; gap:10px; margin-top:16px;}
+  .answer-row .btn{font-size:14.5px; padding:13px 10px;}
+  .btn.wrong{background:transparent; border-color:var(--stamp-soft); color:var(--stamp);}
+  .btn.right{background:var(--indigo); border-color:var(--indigo);}
+
+  .queue-note{text-align:center; font-size:11.5px; color:var(--muted); margin-top:14px;}
+
+  .done-screen{text-align:center; padding:10px 0;}
+  .done-screen .glyph{font-family:'Shippori Mincho', serif; font-size:48px; color:var(--stamp);}
+  .done-screen h3{font-family:'Shippori Mincho', serif; margin:8px 0 4px;}
+  .done-screen p{color:var(--ink-soft); font-size:13.5px; margin:0 0 18px;}
+
+  footer{text-align:center; margin-top:26px;}
+  footer button{background:none;border:none;color:var(--muted);font-size:11.5px;cursor:pointer;font-family:inherit;text-decoration:underline;}
+
+  @media (max-width:420px){
+    .tile-grid{grid-template-columns:repeat(5,1fr); gap:6px;}
+    .tile{font-size:20px;}
+    .flip-card{height:210px;}
+    .face.front .k{font-size:76px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="glyph">漢</div>
+      <div>
+        <h1>マラソン漢字</h1>
+        <div class="sub">Kanji de N4 e N3 — 10 por dia até a viagem</div>
+      </div>
+    </div>
+    <div class="countdown">
+      <div class="num" id="countdownNum">–</div>
+      <div class="lbl">dias até 23/10</div>
+    </div>
+  </header>
+
+  <div class="strip-wrap">
+    <div class="strip-title"><span id="stripTitle">— dias · — kanji</span><span id="overallProgress">0% concluído</span></div>
+    <div class="strip" id="dayStrip"></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="panelTitle">Dia 1</h2>
+    </div>
+    <div class="progress-line">
+      <div class="progress-track"><div class="progress-fill" id="dayProgressFill" style="width:0%"></div></div>
+      <div class="progress-num" id="dayProgressNum">0/10 dominados</div>
+    </div>
+    <div class="tile-grid" id="tileGrid"></div>
+    <button class="btn" id="startBtn">Iniciar treino</button>
+    <div class="hint">Cada kanji precisa de <b>10 acertos</b> para ser dominado. Errou? Ele volta para o baralho.</div>
+  </div>
+
+  <footer>
+    <button id="resetBtn">Reiniciar todo o progresso</button>
+  </footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="drill-box" id="drillBox"></div>
+</div>
+
+<script>
+/* ---------- DATA ---------- */
+// [kanji, meanings, on-yomi, kun-yomi]
+const KANJI = [["会","Meeting, Meet, Party","かい・え","あ.う・あ.わせる・あつ.まる"],["同","Same, Agree, Equal","どう","おな.じ"],["事","Matter, Thing, Fact","じ・ず","こと・つか.う・つか.える"],["自","Oneself","じ・し","みずか.ら・おの.ずから・おの.ずと"],["社","Company, Firm, Office","しゃ","やしろ"],["発","Departure, Discharge, Publish","はつ・ほつ","た.つ・あば.く・おこ.る・つか.わす"],["者","Someone, Person","しゃ","もの"],["地","Ground, Earth","ち・じ",""],["業","Business, Vocation, Arts","ぎょう・ごう","わざ"],["方","Direction, Person, Alternative","ほう","かた・-かた・-がた"],["新","New","しん","あたら.しい・あら.た・あら-・にい-"],["場","Location, Place","じょう・ちょう","ば"],["員","Employee, Member, Number","いん",""],["立","Stand Up, Rise, Set Up","りつ・りゅう・りっとる","た.つ・-た.つ・た.ち-・た.てる"],["開","Open, Unfold, Unseal","かい","ひら.く・ひら.き・-びら.き・ひら.ける"],["手","Hand","しゅ・ず","て・て-・-て・た-"],["力","Power, Strength, Strong","りょく・りき・りい","ちから"],["問","Question, Ask, Problem","もん","と.う・と.い・とん"],["代","Substitute, Change, Convert","だい・たい","か.わる・かわ.る・かわ.り・か.わり"],["明","Bright, Light","めい・みょう・みん","あ.かり・あか.るい・あか.るむ・あか.らむ"],["動","Move, Motion, Change","どう","うご.く・うご.かす"],["京","Capital, 10**16","きょう・けい・きん","みやこ"],["目","Eye, Class, Look","もく・ぼく","め・-め・ま-"],["通","Traffic, Pass Through, Avenue","つう・つ","とお.る・とお.り・-とお.り・-どお.り"],["言","Say, Word","げん・ごん","い.う・こと"],["理","Logic, Arrangement, Reason","り","ことわり"],["体","Body, Substance, Object","たい・てい","からだ・かたち"],["田","Rice Field, Rice Paddy","でん","た"],["主","Lord, Chief, Master","しゅ・す・しゅう","ぬし・おも・あるじ"],["題","Topic, Subject","だい",""],["意","Idea, Mind, Heart","い",""],["不","Negative, Non-, Bad","ふ・ぶ",""],["作","Make, Production, Prepare","さく・さ","つく.る・つく.り・-づく.り"],["用","Utilize, Business, Service","よう","もち.いる"],["度","Degrees, Occurrence, Time","ど・と・たく","たび・-た.い"],["強","Strong","きょう・ごう","つよ.い・つよ.まる・つよ.める・し.いる"],["公","Public, Prince, Official","こう・く","おおやけ"],["持","Hold, Have","じ","も.つ・-も.ち・も.てる"],["野","Plains, Field, Rustic","や・しょ","の・の-"],["以","By Means Of, Because, In View Of","い","もっ.て"],["思","Think","し","おも.う・おもえら.く・おぼ.す"],["家","House, Home, Family","か・け","いえ・や・うち"],["世","Generation, World, Society","せい・せ・そう","よ"],["多","Many, Frequent, Much","た","おお.い・まさ.に・まさ.る"],["正","Correct, Justice, Righteous","せい・しょう","ただ.しい・ただ.す・まさ・まさ.に"],["安","Relax, Cheap, Low","あん","やす.い・やす.まる・やす・やす.らか"],["院","Inst., Institution, Temple","いん",""],["心","Heart, Mind, Spirit","しん","こころ・-ごころ"],["界","World, Boundary","かい",""],["教","Teach, Faith, Doctrine","きょう","おし.える・おそ.わる"],["文","Sentence, Literature, Style","ぶん・もん","ふみ・あや"],["元","Beginning, Former Time, Origin","げん・がん","もと"],["重","Heavy, Important, Esteem","じゅう・ちょう","え・おも.い・おも.り・おも.なう"],["近","Near, Early, Akin","きん・こん","ちか.い"],["考","Consider, Think Over","こう","かんが.える・かんが.え"],["画","Brush-stroke, Picture","が・かく・え・かい","えが.く・かく.する・かぎ.る・はかりごと"],["海","Sea, Ocean","かい","うみ"],["売","Sell","ばい","う.る・う.れる"],["知","Know, Wisdom","ち","し.る・し.らせる"],["道","Road-way, Street, District","どう・とう","みち・いう"],["集","Gather, Meet, Congregate","しゅう","あつ.まる・あつ.める・つど.う"],["別","Separate, Branch Off, Diverge","べつ","わか.れる・わ.ける"],["物","Thing, Object, Matter","ぶつ・もつ","もの・もの-"],["使","Use, Send On A Mission, Order","し","つか.う・つか.い・-つか.い・-づか.い"],["品","Goods, Refinement, Dignity","ひん・ほん","しな"],["計","Plot, Plan, Scheme","けい","はか.る・はか.らう"],["死","Death, Die","し","し.ぬ・し.に-"],["特","Special","とく",""],["私","Private, I, Me","し","わたくし・わたし"],["始","Commence, Begin","し","はじ.める・-はじ.める・はじ.まる"],["朝","Morning, Dynasty, Regime","ちょう","あさ"],["運","Carry, Luck, Destiny","うん","はこ.ぶ"],["終","End, Finish","しゅう","お.わる・-お.わる・おわ.る・お.える"],["台","Pedestal, A Stand, Counter For Machines And Vehicles","だい・たい","うてな・われ・つかさ"],["広","Wide, Broad, Spacious","こう","ひろ.い・ひろ.まる・ひろ.める・ひろ.がる"],["住","Dwell, Reside, Live","じゅう・ぢゅう・ちゅう","す.む・す.まう・-ず.まい"],["真","True, Reality, Buddhist Sect","しん","ま・ま-・まこと"],["有","Possess, Have, Exist","ゆう・う","あ.る"],["口","Mouth","こう・く","くち"],["少","Few, Little","しょう","すく.ない・すこ.し"],["町","Town, Village, Block","ちょう","まち"],["料","Fee, Materials","りょう",""],["工","Craft, Construction, Katakana E Radical (no. 48)","こう・く・ぐ",""],["建","Build","けん・こん","た.てる・た.て・-だ.て・た.つ"],["空","Empty, Sky, Void","くう","そら・あ.く・あ.き・あ.ける"],["急","Hurry, Emergency, Sudden","きゅう","いそ.ぐ・いそ.ぎ・せ.く"],["止","Stop, Halt","し","と.まる・-ど.まり・と.める・-と.める"],["送","Escort, Send","そう","おく.る"],["切","Cut, Cutoff, Be Sharp","せつ・さい","き.る・-き.る・き.り・-き.り"],["転","Revolve, Turn Around, Change","てん","ころ.がる・ころ.げる・ころ.がす・ころ.ぶ"],["研","Polish, Study Of, Sharpen","けん","と.ぐ"],["足","Leg, Foot, Be Sufficient","そく","あし・た.りる・た.る・た.す"],["究","Research, Study","きゅう・く","きわ.める"],["楽","Music, Comfort, Ease","がく・らく・ごう","たの.しい・たの.しむ・この.む"],["起","Rouse, Wake Up, Get Up","き","お.きる・お.こる・お.こす・おこ.す"],["着","Don, Arrive, Wear","ちゃく・じゃく","き.る・-ぎ・き.せる・-き.せ"],["店","Store, Shop","てん","みせ・たな"],["病","Ill, Sick","びょう・へい","や.む・-や.み・やまい"],["質","Substance, Quality, Matter","しつ・しち・ち","たち・ただ.す・もと・わりふ"],["待","Wait, Depend On","たい","ま.つ・-ま.ち"],["試","Test, Try, Attempt","し","こころ.みる・ため.す"],["族","Tribe, Family","ぞく",""],["銀","Silver","ぎん","しろがね"],["早","Early, Fast","そう・さっ","はや.い・はや・はや-・はや.まる"],["映","Reflect, Reflection, Projection","えい","うつ.る・うつ.す・は.える・-ば.え"],["親","Parent, Intimacy, Relative","しん","おや・おや-・した.しい・した.しむ"],["験","Verification, Effect, Testing","けん・げん","あかし・しるし・ため.す・ためし"],["英","England, English, Hero","えい","はなぶさ"],["医","Doctor, Medicine","い","い.やす・い.する・くすし"],["仕","Attend, Doing, Official","し・じ","つか.える"],["去","Gone, Past, Quit","きょ・こ","さ.る・-さ.る"],["味","Flavor, Taste","み","あじ・あじ.わう"],["写","Copy, Be Photographed, Describe","しゃ・じゃ","うつ.す・うつ.る・うつ-・うつ.し"],["字","Character, Letter, Word","じ","あざ・あざな・-な"],["答","Solution, Answer","とう","こた.える・こた.え"],["夜","Night, Evening","や","よ・よる"],["音","Sound, Noise","おん・いん・-のん","おと・ね"],["注","Pour, Irrigate, Shed (tears)","ちゅう","そそ.ぐ・さ.す・つ.ぐ"],["帰","Homecoming, Arrive At, Lead To","き","かえ.る・かえ.す・おく.る・とつ.ぐ"],["古","Old","こ","ふる.い・ふる-・-ふる.す"],["歌","Song, Sing","か","うた・うた.う"],["買","Buy","ばい","か.う"],["悪","Bad, Vice, Rascal","あく・お","わる.い・わる-・あ.し・にく.い"],["図","Map, Drawing, Plan","ず・と","え・はか.る"],["週","Week","しゅう",""],["室","Room, Apartment, Chamber","しつ","むろ"],["歩","Walk, Counter For Steps","ほ・ぶ・ふ","ある.く・あゆ.む"],["風","Wind, Air, Style","ふう・ふ","かぜ・かざ-・-かぜ"],["紙","Paper","し","かみ"],["黒","Black","こく","くろ・くろ.ずむ・くろ.い"],["花","Flower","か・け","はな"],["春","Springtime, Spring (season)","しゅん","はる"],["赤","Red","せき・しゃく","あか・あか-・あか.い・あか.らむ"],["青","Blue, Green","せい・しょう","あお・あお-・あお.い"],["館","Building, Mansion, Large Building","かん","やかた・たて"],["屋","Roof, House, Shop","おく","や"],["色","Color","しょく・しき","いろ"],["走","Run","そう","はし.る"],["秋","Autumn","しゅう","あき・とき"],["夏","Summer","か・が・げ","なつ"],["習","Learn","しゅう・じゅ","なら.う・なら.い"],["駅","Station","えき",""],["洋","Ocean, Sea, Foreign","よう",""],["旅","Trip, Travel","りょ","たび"],["服","Clothing, Admit, Obey","ふく",""],["夕","Evening","せき","ゆう"],["借","Borrow, Rent","しゃく","か.りる"],["曜","Weekday","よう",""],["飲","Drink, Smoke, Take","いん・おん","の.む・-の.み"],["肉","Meat","にく","しし"],["貸","Lend","たい","か.す・か.し-・かし-"],["堂","Public Chamber, Hall","どう",""],["鳥","Bird, Chicken","ちょう","とり"],["飯","Meal, Boiled Rice","はん","めし"],["勉","Exertion, Endeavour, Encourage","べん","つと.める"],["冬","Winter","とう","ふゆ"],["昼","Daytime, Noon","ちゅう","ひる"],["茶","Tea","ちゃ・さ",""],["弟","Younger Brother, Faithful Service To Elders","てい・だい・で","おとうと"],["牛","Cow","ぎゅう","うし"],["魚","Fish","ぎょ","うお・さかな・-ざかな"],["兄","Elder Brother, Big Brother","けい・きょう","あに"],["犬","Dog","けん","いぬ・いぬ-"],["妹","Younger Sister","まい","いもうと"],["姉","Elder Sister","し","あね・はは"],["漢","Sino-, China","かん",""],["政","Politics, Government","せい・しょう","まつりごと・まん"],["議","Deliberation, Consultation, Debate","ぎ",""],["民","People, Nation, Subjects","みん","たみ"],["連","Take Along, Lead, Join","れん","つら.なる・つら.ねる・つ.れる・-づ.れ"],["対","Vis-a-vis, Opposite, Even","たい・つい","あいて・こた.える・そろ.い・つれあ.い"],["部","Section, Bureau, Dept","ぶ","-べ"],["合","Fit, Suit, Join","ごう・がっ・かっ","あ.う・-あ.う・あ.い・あい-"],["市","Market, City, Town","し","いち"],["内","Inside, Within, Between","ない・だい","うち"],["相","Inter-, Mutual, Together","そう・しょう","あい-"],["定","Determine, Fix, Establish","てい・じょう","さだ.める・さだ.まる・さだ.か"],["回","-times, Round, Game","かい・え","まわ.る・-まわ.る・-まわ.り・まわ.す"],["選","Elect, Select, Choose","せん","えら.ぶ"],["米","Rice, Usa, Metre","べい・まい・めえとる","こめ・よね"],["実","Reality, Truth","じつ・しつ","み・みの.る・まこと・みの"],["関","Connection, Barrier, Gateway","かん","せき・-ぜき・かか.わる・からくり"],["決","Decide, Fix, Agree Upon","けつ","き.める・-ぎ.め・き.まる・さ.く"],["全","Whole, Entire, All","ぜん","まった.く・すべ.て"],["表","Surface, Table, Chart","ひょう","おもて・-おもて・あらわ.す・あらわ.れる"],["戦","War, Battle, Match","せん","いくさ・たたか.う・おのの.く・そよ.ぐ"],["経","Sutra, Longitude, Pass Thru","けい・きょう・きん","へ.る・た.つ・たていと・はか.る"],["最","Utmost, Most, Extreme","さい・しゅ","もっと.も・つま"],["現","Present, Existing, Actual","げん","あらわ.れる・あらわ.す・うつつ・うつ.つ"],["調","Tune, Tone, Meter","ちょう","しら.べる・しら.べ・ととの.う・ととの.える"],["化","Change, Take The Form Of, Influence","か・け","ば.ける・ば.かす・ふ.ける・け.する"],["当","Hit, Right, Appropriate","とう","あ.たる・あ.たり・あ.てる・あ.て"],["約","Promise, Approximately, Shrink","やく","つづ.まる・つづ.める・つづま.やか"],["首","Neck, Counter For Songs And Poems","しゅ","くび"],["法","Method, Law, Rule","ほう・はっ・ほっ・ふらん","のり"],["性","Sex, Gender, Nature","せい・しょう","さが"],["要","Need, Main Point, Essence","よう","い.る・かなめ"],["制","System, Law, Rule","せい",""],["治","Reign, Be At Peace, Calm Down","じ・ち","おさ.める・おさ.まる・なお.る・なお.す"],["務","Task, Duties","む","つと.める"],["成","Turn Into, Become, Get","せい・じょう","な.る・な.す・-な.す"],["期","Period, Time, Date","き・ご",""],["取","Take, Fetch, Take Up","しゅ","と.る・と.り・と.り-・とり"],["都","Metropolis, Capital, All","と・つ","みやこ"],["和","Harmony, Japanese Style, Peace","わ・お・か","やわ.らぐ・やわ.らげる・なご.む・なご.やか"],["機","Loom, Mechanism, Machine","き","はた"],["平","Even, Flat, Peace","へい・びょう・ひょう","たい.ら・-だいら・ひら・ひら-"],["加","Add, Addition, Increase","か","くわ.える・くわ.わる"],["受","Accept, Undergo, Answer (phone)","じゅ","う.ける・-う.け・う.かる"],["続","Continue, Series, Sequel","ぞく・しょく・こう・きょう","つづ.く・つづ.ける・つぐ.ない"],["進","Advance, Proceed, Progress","しん","すす.む・すす.める"],["数","Number, Strength, Fate","すう・す・さく・そく","かず・かぞ.える・しばしば・せ.める"],["記","Scribe, Account, Narrative","き","しる.す"],["初","First Time, Beginning","しょ","はじ.め・はじ.めて・はつ・はつ-"],["指","Finger, Point To, Indicate","し","ゆび・さ.す・-さ.し"],["権","Authority, Power, Rights","けん・ごん","おもり・かり・はか.る"],["支","Branch, Support, Sustain","し","ささ.える・つか.える・か.う"],["産","Products, Bear, Give Birth","さん","う.む・う.まれる・うぶ-・む.す"],["点","Spot, Point, Mark","てん","つ.ける・つ.く・た.てる・さ.す"],["報","Report, News, Reward","ほう","むく.いる"],["済","Settle (debt, Etc.), Relieve (burden), Finish","さい・せい","す.む・-ず.み・-ずみ・す.まない"],["活","Lively, Resuscitation, Being Helped","かつ","い.きる・い.かす・い.ける"],["原","Meadow, Original, Primitive","げん","はら"],["共","Together, Both, Neither","きょう","とも・とも.に・-ども"],["得","Gain, Get, Find","とく","え.る・う.る"],["解","Unravel, Notes, Key","かい・げ","と.く・と.かす・と.ける・ほど.く"],["交","Mingle, Mixing, Association","こう","まじ.わる・まじ.える・ま.じる・まじ.る"],["資","Assets, Resources, Capital","し",""],["予","Beforehand, Previous, Myself","よ・しゃ","あらかじ.め"],["向","Yonder, Facing, Beyond","こう","む.く・む.い・-む.き・む.ける"],["際","Occasion, Side, Edge","さい","きわ・-ぎわ"],["勝","Victory, Win, Prevail","しょう","か.つ・-が.ち・まさ.る・すぐ.れる"],["面","Mask, Face, Features","めん・べん","おも・おもて・つら"],["告","Revelation, Tell, Inform","こく","つ.げる"],["反","Anti-","はん・ほん・たん・ほ","そ.る・そ.らす・かえ.す・かえ.る"],["判","Judgement, Signature, Stamp","はん・ばん","わか.る"],["認","Acknowledge, Witness, Discern","にん","みと.める・したた.める"],["参","Nonplussed, Three (in Documents), Going","さん・しん","まい.る・まい-・まじわる・みつ"],["利","Profit, Advantage, Benefit","り","き.く"],["組","Association, Braid, Plait","そ","く.む・くみ・-ぐみ"],["信","Faith, Truth, Fidelity","しん",""],["在","Exist, Outskirts, Suburbs","ざい","あ.る"],["件","Affair, Case, Matter","けん","くだん"],["側","Side, Lean, Oppose","そく","かわ・がわ・そば"],["任","Responsibility, Duty, Term","にん","まか.せる・まか.す"],["引","Pull, Tug, Jerk","いん","ひ.く・ひ.き・ひ.き-・-び.き"],["求","Request, Want, Wish For","きゅう・ぐ","もと.める"],["所","Place, Extent","しょ","ところ・-ところ・どころ・とこ"],["次","Next, Order, Sequence","じ・し","つ.ぐ・つぎ"],["昨","Yesterday, Previous","さく",""],["論","Argument, Discourse","ろん",""],["官","Bureaucrat, The Government, Organ","かん",""],["増","Increase, Add, Augment","ぞう","ま.す・ま.し・ふ.える・ふ.やす"],["係","Person In Charge, Connection, Duty","けい","かか.る・かかり・-がかり・かか.わる"],["感","Emotion, Feeling, Sensation","かん",""],["情","Feelings, Emotion, Passion","じょう・せい","なさ.け"],["投","Throw, Discard, Abandon","とう","な.げる・-な.げ"],["示","Show, Indicate, Point Out","じ・し","しめ.す"],["変","Unusual, Change, Strange","へん","か.わる・か.わり・か.える"],["打","Strike, Hit, Knock","だ・だあす","う.つ・う.ち-・ぶ.つ"],["直","Straightaway, Honesty, Frankness","ちょく・じき・じか","ただ.ちに・なお.す・-なお.す・なお.る"],["両","Both, Old Japanese Coin, Counter For Carriages (e.g., In A Train)","りょう","てる・ふたつ"],["式","Style, Ceremony, Rite","しき",""],["確","Assurance, Firm, Tight","かく・こう","たし.か・たし.かめる"],["果","Fruit, Reward, Carry Out","か","は.たす・はた.す・-は.たす・は.てる"],["容","Contain, Form, Looks","よう","い.れる"],["必","Invariably, Certain, Inevitable","ひつ","かなら.ず"],["演","Performance, Act, Play","えん",""],["歳","Year-end, Age, Occasion","さい・せい","とし・とせ・よわい"],["争","Contend, Dispute, Argue","そう","あらそ.う・いか.でか"],["談","Discuss, Talk","だん",""],["能","Ability, Talent, Skill","のう","よ.く"],["位","Rank, Grade, Throne","い","くらい・ぐらい"],["置","Placement, Put, Set","ち","お.く・-お.き"],["流","Current, A Sink, Flow","りゅう・る","なが.れる・なが.れ・なが.す・-なが.す"],["格","Status, Rank, Capacity","かく・こう・きゃく・ごう",""],["疑","Doubt, Distrust, Be Suspicious","ぎ","うたが.う"],["過","Overdo, Exceed, Go Beyond","か","す.ぎる・-す.ぎる・-す.ぎ・す.ごす"],["局","Bureau, Board, Office","きょく","つぼね"],["放","Set Free, Release, Fire","ほう","はな.す・-っぱな.し・はな.つ・はな.れる"],["常","Usual, Ordinary, Normal","じょう","つね・とこ-"],["状","Status Quo, Conditions, Circumstances","じょう",""],["球","Ball, Sphere","きゅう","たま"],["職","Post, Employment, Work","しょく・そく",""],["与","Bestow, Participate In, Give","よ","あた.える・あずか.る・くみ.する・ともに"],["供","Submit, Offer, Present","きょう・く・くう・ぐ","そな.える・とも・-ども"],["役","Duty, War, Campaign","やく・えき",""],["構","Posture, Build, Pretend","こう","かま.える・かま.う"],["割","Proportion, Comparatively, Divide","かつ","わ.る・わり・わ.り・わ.れる"],["費","Expense, Cost, Spend","ひ","つい.やす・つい.える"],["付","Adhere, Attach, Refer To","ふ","つ.ける・-つ.ける・-づ.ける・つ.け"],["由","Wherefore, A Reason","ゆ・ゆう・ゆい","よし・よ.る"],["説","Opinion, Theory, Explanation","せつ・ぜい","と.く"],["難","Difficult, Impossible, Trouble","なん","かた.い・-がた.い・むずか.しい・むづか.しい"],["優","Tenderness, Excel, Surpass","ゆう・う","やさ.しい・すぐ.れる・まさ.る"],["夫","Husband, Man","ふ・ふう・ぶ","おっと・それ"],["収","Income, Obtain, Reap","しゅう","おさ.める・おさ.まる"],["断","Severance, Decline, Refuse","だん","た.つ・ことわ.る・さだ.める"],["石","Stone","せき・しゃく・こく","いし"],["違","Difference, Differ","い","ちが.う・ちが.い・ちが.える・-ちが.える"],["消","Extinguish, Blow Out, Turn Off","しょう","き.える・け.す"],["神","Gods, Mind, Soul","しん・じん","かみ・かん-・こう-"],["番","Turn, Number In A Series","ばん","つが.い"],["規","Standard, Measure","き",""],["術","Art, Technique, Skill","じゅつ","すべ"],["備","Equip, Provision, Preparation","び","そな.える・そな.わる・つぶさ.に"],["宅","Home, House, Residence","たく",""],["害","Harm, Injury","がい",""],["配","Distribute, Spouse, Exile","はい","くば.る"],["警","Admonish, Commandment","けい","いまし.める"],["育","Bring Up, Grow Up, Raise","いく","そだ.つ・そだ.ち・そだ.てる・はぐく.む"],["席","Seat, Mat, Occasion","せき","むしろ"],["訪","Call On, Visit, Look Up","ほう","おとず.れる・たず.ねる・と.う"],["乗","Ride, Power, Multiplication","じょう・しょう","の.る・-の.り・の.せる"],["残","Remainder, Leftover, Balance","ざん・さん","のこ.る・のこ.す・そこな.う・のこ.り"],["想","Concept, Think, Idea","そう・そ","おも.う"],["声","Voice","せい・しょう","こえ・こわ-"],["念","Wish, Sense, Idea","ねん",""],["助","Help, Rescue, Assist","じょ","たす.ける・たす.かる・す.ける・すけ"],["労","Labor, Thank For, Reward For","ろう","ろう.する・いたわ.る・いた.ずき・ねぎら"],["例","Example, Custom, Usage","れい","たと.える"],["然","Sort Of Thing, So, If So","ぜん・ねん","しか・しか.り・しか.し・さ"],["限","Limit, Restrict, To Best Of Ability","げん","かぎ.る・かぎ.り・-かぎ.り"],["追","Chase, Drive Away, Follow","つい","お.う"],["商","Make A Deal, Selling, Dealing In","しょう","あきな.う"],["葉","Leaf, Plane, Lobe","よう","は"],["伝","Transmit, Go Along, Walk Along","でん・てん","つた.わる・つた.える・つた.う・つだ.う"],["働","Work, (kokuji)","どう","はたら.く"],["形","Shape, Form, Style","けい・ぎょう","かた・-がた・かたち・なり"],["景","Scenery, View","けい",""],["落","Fall, Drop, Come Down","らく","お.ちる・お.ち・お.とす"],["好","Fond, Pleasing, Like Something","こう","この.む・す.く・よ.い・い.い"],["退","Retreat, Withdraw, Retire","たい","しりぞ.く・しりぞ.ける・ひ.く・の.く"],["頭","Head, Counter For Large Animals","とう・ず・と","あたま・かしら・-がしら・かぶり"],["負","Defeat, Negative, -","ふ","ま.ける・ま.かす・お.う"],["渡","Transit, Ford, Ferry","と","わた.る・-わた.る・わた.す"],["失","Lose, Error, Fault","しつ","うしな.う・う.せる"],["差","Distinction, Difference, Variation","さ","さ.す・さ.し"],["末","End, Close, Tip","まつ・ばつ","すえ"],["守","Guard, Protect, Defend","しゅ・す","まも.る・まも.り・もり・-もり"],["若","Young, If, Perhaps","じゃく・にゃく・にゃ","わか.い・わか-・も.しくわ・も.し"],["種","Species, Kind, Class","しゅ","たね・-ぐさ"],["美","Beauty, Beautiful","び・み","うつく.しい"],["命","Fate, Command, Decree","めい・みょう","いのち"],["福","Blessing, Fortune, Luck","ふく",""],["望","Ambition, Full Moon, Hope","ぼう・もう","のぞ.む・もち"],["非","Un-, Mistake, Negative","ひ","あら.ず"],["観","Outlook, Look, Appearance","かん","み.る・しめ.す"],["察","Guess, Presume, Surmise","さつ",""],["段","Grade, Steps, Stairs","だん・たん",""],["横","Sideways, Side, Horizontal","おう","よこ"],["深","Deep, Heighten, Intensify","しん","ふか.い・-ぶか.い・ふか.まる・ふか.める"],["申","Have The Honor To, Sign Of The Monkey, 3-5pm","しん","もう.す・もう.し-・さる"],["様","Esq., Way, Manner","よう・しょう","さま・さん"],["財","Property, Money, Wealth","ざい・さい・ぞく","たから"],["港","Harbor","こう","みなと"],["識","Discriminating, Know, Write","しき","し.る・しる.す"],["呼","Call, Call Out To, Invite","こ","よ.ぶ"],["達","Accomplished, Reach, Arrive","たつ・だ","-たち"],["良","Good, Pleasing, Skilled","りょう","よ.い・-よ.い・い.い・-い.い"],["候","Climate, Season, Weather","こう","そうろう"],["程","Extent, Degree, Law","てい","ほど・-ほど"],["満","Full, Fullness, Enough","まん・ばん","み.ちる・み.つ・み.たす"],["敗","Failure, Defeat, Reversal","はい","やぶ.れる"],["値","Price, Cost, Value","ち","ね・あたい"],["突","Stab, Protruding, Thrust","とつ・か","つ.く"],["光","Ray, Light","こう","ひか.る・ひかり"],["路","Path, Route, Road","ろ・る","-じ・みち"],["科","Department, Course, Section","か",""],["積","Volume, Product (x*y), Acreage","せき","つ.む・-づ.み・つ.もる・つ.もり"],["他","Other, Another, The Others","た","ほか"],["処","Dispose, Manage, Deal With","しょ","ところ・-こ・お.る"],["太","Plump, Thick, Big Around","たい・た","ふと.い・ふと.る"],["客","Guest, Visitor, Customer","きゃく・かく",""],["否","Negate, No, Noes","ひ","いな・いや"],["師","Expert, Teacher, Master","し","いくさ"],["登","Ascend, Climb Up","とう・と・どう・しょう","のぼ.る・あ.がる"],["易","Easy, Ready To, Simple","えき・い","やさ.しい・やす.い"],["速","Quick, Fast","そく","はや.い・はや-・はや.める・すみ.やか"],["存","Exist, Suppose, Be Aware Of","そん・ぞん","ながら.える・あ.る・たも.つ・と.う"],["飛","Fly, Skip (pages), Scatter","ひ","と.ぶ・と.ばす・-と.ばす"],["殺","Kill, Murder, Butcher","さつ・さい・せつ","ころ.す・-ごろ.し・そ.ぐ"],["号","Nickname, Number, Item","ごう","さけ.ぶ・よびな"],["単","Simple, One, Single","たん","ひとえ"],["座","Squat, Seat, Cushion","ざ","すわ.る"],["破","Rend, Rip, Tear","は","やぶ.る・やぶ.れる・わ.れる"],["除","Exclude, Division (x/3), Remove","じょ・じ","のぞ.く・-よ.け"],["完","Perfect, Completion, End","かん",""],["降","Descend, Precipitate, Fall","こう・ご","お.りる・お.ろす・ふ.る・ふ.り"],["責","Blame, Condemn, Censure","せき","せ.める"],["捕","Catch, Capture","ほ","と.らえる・と.らわれる・と.る・とら.える"],["危","Dangerous, Fear, Uneasy","き","あぶ.ない・あや.うい・あや.ぶむ"],["給","Salary, Wage, Gift","きゅう","たま.う・たも.う・-たま.え"],["苦","Suffering, Trial, Worry","く","くる.しい・-ぐる.しい・くる.しむ・くる.しめる"],["迎","Welcome, Meet, Greet","げい","むか.える"],["園","Park, Garden, Yard","えん","その"],["具","Tool, Utensil, Means","ぐ","そな.える・つぶさ.に"],["辞","Resign, Word, Term","じ","や.める・いな.む"],["因","Cause, Factor, Be Associated With","いん","よ.る・ちな.む"],["馬","Horse","ば","うま・うま-・ま"],["愛","Love, Affection, Favourite","あい","いと.しい・かな.しい・め.でる・お.しむ"],["富","Wealth, Enrich, Abundant","ふ・ふう","と.む・とみ"],["彼","He, That, The","ひ","かれ・かの・か.の"],["未","Un-, Not Yet, Hitherto","み・び","いま.だ・ま.だ・ひつじ"],["舞","Dance, Flit, Circle","ぶ","ま.う・-ま.う・まい"],["亡","Deceased, The Late, Dying","ぼう・もう","な.い・な.き-・ほろ.びる・ほろ.ぶ"],["冷","Cool, Cold (beer, Person), Chill","れい","つめ.たい・ひ.える・ひ.や・ひ.ややか"],["適","Suitable, Occasional, Rare","てき","かな.う"],["婦","Lady, Woman, Wife","ふ","よめ"],["寄","Draw Near, Stop In, Bring Near","き","よ.る・-よ.り・よ.せる"],["込","Crowded, Mixture, In Bulk","","-こ.む・こ.む・こ.み・-こ.み"],["顔","Face, Expression","がん","かお"],["類","Sort, Kind, Variety","るい","たぐ.い"],["余","Too Much, Myself, Surplus","よ","あま.る・あま.り・あま.す・あんま.り"],["王","King, Rule, Magnate","おう・-のう",""],["返","Return, Answer, Fade","へん","かえ.す・-かえ.す・かえ.る・-かえ.る"],["妻","Wife, Spouse","さい","つま"],["背","Stature, Height, Back","はい","せ・せい・そむ.く・そむ.ける"],["熱","Heat, Temperature, Fever","ねつ","あつ.い"],["宿","Inn, Lodging, Relay Station","しゅく","やど・やど.る・やど.す"],["薬","Medicine, Chemical, Enamel","やく","くすり"],["険","Precipitous, Inaccessible Place, Impregnable Position","けん","けわ.しい"],["頼","Trust, Request","らい","たの.む・たの.もしい・たよ.る"],["覚","Memorize, Learn, Remember","かく","おぼ.える・さ.ます・さ.める・さと.る"],["船","Ship, Boat","せん","ふね・ふな-"],["途","Route, Way, Road","と","みち"],["許","Permit, Approve","きょ","ゆる.す・もと"],["抜","Slip Out, Extract, Pull Out","ばつ・はつ・はい","ぬ.く・-ぬ.く・ぬ.き・ぬ.ける"],["便","Convenience, Facility, Excrement","べん・びん","たよ.り"],["留","Detain, Fasten, Halt","りゅう・る","と.める・と.まる・とど.める・とど.まる"],["罪","Guilt, Sin, Crime","ざい","つみ"],["努","Toil, Diligent, As Much As Possible","ど","つと.める"],["精","Refined, Ghost, Fairy","せい・しょう","しら.げる・くわ.しい"],["散","Scatter, Disperse, Spend","さん","ち.る・ち.らす・-ち.らす・ち.らかす"],["静","Quiet","せい・じょう","しず-・しず.か・しず.まる・しず.める"],["婚","Marriage","こん",""],["喜","Rejoice, Take Pleasure In","き","よろこ.ぶ・よろこ.ばす"],["浮","Floating, Float, Rise To Surface","ふ","う.く・う.かれる・う.かぶ・む"],["絶","Discontinue, Sever, Cut Off","ぜつ","た.える・た.やす・た.つ"],["幸","Happiness, Blessing, Fortune","こう","さいわ.い・さち・しあわ.せ"],["押","Push, Stop, Check","おう","お.す・お.し-・お.っ-・お.さえる"],["倒","Overthrow, Fall, Collapse","とう","たお.れる・-だお.れ・たお.す・さかさま"],["等","Etc., And So Forth, Class (first)","とう","ひと.しい・など・-ら"],["老","Old Man, Old Age, Grow Old","ろう","お.いる・ふ.ける"],["曲","Bend, Music, Melody","きょく","ま.がる・ま.げる・くま"],["払","Pay, Clear Out, Prune","ふつ・ひつ・ほつ","はら.う・-はら.い・-ばら.い"],["庭","Courtyard, Garden, Yard","てい","にわ"],["徒","On Foot, Junior, Emptiness","と","いたずら・あだ"],["勤","Diligence, Become Employed, Serve","きん・ごん","つと.める・-づと.め・つと.まる・いそ.しむ"],["遅","Slow, Late, Back","ち","おく.れる・おく.らす・おそ.い"],["居","Reside, To Be, Exist","きょ・こ","い.る・-い・お.る"],["雑","Miscellaneous","ざつ・ぞう","まじ.える・まじ.る"],["招","Beckon, Invite, Summon","しょう","まね.く"],["困","Quandary, Become Distressed, Annoyed","こん","こま.る"],["欠","Lack, Gap, Fail","けつ・けん","か.ける・か.く"],["更","Grow Late, Night Watch, Sit Up Late","こう","さら・さら.に・ふ.ける・ふ.かす"],["刻","Engrave, Cut Fine, Chop","こく","きざ.む・きざ.み"],["賛","Approve, Praise, Title Or Inscription On Picture","さん","たす.ける・たた.える"],["抱","Embrace, Hug, Hold In Arms","ほう","だ.く・いだ.く・かか.える"],["犯","Crime, Sin, Offense","はん・ぼん","おか.す"],["恐","Fear, Dread, Awe","きょう","おそ.れる・おそ.る・おそ.ろしい・こわ.い"],["息","Breath, Respiration, Son","そく","いき"],["遠","Distant, Far","えん・おん","とお.い"],["戻","Re-, Return, Revert","れい","もど.す・もど.る"],["願","Petition, Request, Vow","がん","ねが.う・-ねがい"],["絵","Picture, Drawing, Painting","かい・え",""],["越","Surpass, Cross Over, Move To","えつ・おつ","こ.す・-こ.す・-ご.し・こ.える"],["欲","Longing, Covetousness, Greed","よく","ほっ.する・ほ.しい"],["痛","Pain, Hurt, Damage","つう","いた.い・いた.む・いた.ましい・いた.める"],["笑","Laugh","しょう","わら.う・え.む"],["互","Mutually, Reciprocally, Together","ご","たが.い・かたみ.に"],["束","Bundle, Sheaf, Ream","そく","たば・たば.ねる・つか・つか.ねる"],["似","Becoming, Resemble, Counterfeit","じ","に.る・ひ.る"],["列","File, Row, Rank","れつ・れ",""],["探","Grope, Search, Look For","たん","さぐ.る・さが.す"],["逃","Escape, Flee, Shirk","とう","に.げる・に.がす・のが.す・のが.れる"],["遊","Play","ゆう・ゆ","あそ.ぶ・あそ.ばす"],["迷","Astray, Be Perplexed, In Doubt","めい","まよ.う"],["夢","Dream, Vision, Illusion","む・ぼう","ゆめ・ゆめ.みる・くら.い"],["君","Mister, You, Ruler","くん","きみ・-ぎみ"],["閉","Closed, Shut","へい","と.じる・と.ざす・し.める・し.まる"],["緒","Thong, Beginning, Inception","しょ・ちょ","お・いとぐち"],["折","Fold, Break, Fracture","せつ・しゃく","お.る・おり・お.り・-お.り"],["草","Grass, Weeds, Herbs","そう","くさ・くさ-・-ぐさ"],["暮","Evening, Twilight, Season's End","ぼ","く.れる・く.らす"],["酒","Sake, Alcohol","しゅ","さけ・さか-"],["悲","Grieve, Sad, Deplore","ひ","かな.しい・かな.しむ"],["晴","Clear Up","せい","は.れる・は.れ・は.れ-・-ば.れ"],["掛","Hang, Suspend, Depend","かい・けい","か.ける・-か.ける・か.け・-か.け"],["到","Arrival, Proceed, Reach","とう","いた.る"],["寝","Lie Down, Sleep, Rest","しん","ね.る・ね.かす・い.ぬ・みたまや"],["暗","Darkness, Disappear, Shade","あん","くら.い・くら.む・くれ.る"],["盗","Steal, Rob, Pilfer","とう","ぬす.む・ぬす.み"],["吸","Suck, Imbibe, Inhale","きゅう","す.う"],["陽","Sunshine, Yang Principle, Positive","よう","ひ"],["御","Honorable, Manipulate, Govern","ぎょ・ご","おん-・お-・み-"],["歯","Tooth, Cog","し","よわい・は・よわ.い・よわい.する"],["忘","Forget","ぼう","わす.れる"],["雪","Snow","せつ","ゆき"],["吹","Blow, Breathe, Puff","すい","ふ.く"],["娘","Daughter, Girl","じょう","むすめ・こ"],["誤","Mistake, Err, Do Wrong","ご","あやま.る・-あやま.る"],["洗","Wash, Inquire Into, Probe","せん","あら.う"],["慣","Accustomed, Get Used To, Become Experienced","かん","な.れる・な.らす"],["礼","Salute, Bow, Ceremony","れい・らい",""],["窓","Window, Pane","そう・す","まど・てんまど・けむだし"],["昔","Once Upon A Time, Antiquity, Old Times","せき・しゃく","むかし"],["貧","Poverty, Poor","ひん・びん","まず.しい"],["怒","Angry, Be Offended","ど・ぬ","いか.る・おこ.る"],["泳","Swim","えい","およ.ぐ"],["祖","Ancestor, Pioneer, Founder","そ",""],["杯","Counter For Cupfuls, Wine Glass, Glass","はい","さかずき"],["疲","Exhausted, Tire, Weary","ひ","つか.れる・-づか.れ・つか.らす"],["皆","All, Everything","かい","みな・みんな"],["鳴","Chirp, Cry, Bark","めい","な.く・な.る・な.らす"],["腹","Abdomen, Belly, Stomach","ふく","はら"],["煙","Smoke","えん","けむ.る・けむり・けむ.い"],["眠","Sleep, Die, Sleepy","みん","ねむ.る・ねむ.い"],["怖","Dreadful, Be Frightened, Fearful","ふ・ほ","こわ.い・こわ.がる・お.じる・おそ.れる"],["耳","Ear","じ","みみ"],["頂","Place On The Head, Receive, Top Of Head","ちょう","いただ.く・いただき"],["箱","Box, Chest, Case","そう","はこ"],["晩","Nightfall, Night","ばん",""],["寒","Cold","かん","さむ.い"],["髪","Hair Of The Head","はつ","かみ"],["忙","Busy, Occupied, Restless","ぼう・もう","いそが.しい・せわ.しい・おそ.れる・うれえるさま"],["才","Genius, Years Old, Cubic Shaku","さい",""],["靴","Shoes","か","くつ"],["恥","Shame, Dishonor","ち","は.じる・はじ・は.じらう・は.ずかしい"],["偶","Accidentally, Even Number, Couple","ぐう","たま"],["偉","Admirable, Greatness, Remarkable","い","えら.い"],["猫","Cat","びょう","ねこ"],["幾","How Many, How Much, How Far","き","いく-・いく.つ・いく.ら"]];
+
+const BATCH_SIZE = 10;
+const TOTAL_DAYS = Math.ceil(KANJI.length / BATCH_SIZE); // 50
+const START_DATE = new Date(2026, 8, 1); // 1 Sep 2026 (month is 0-indexed)
+const TRIP_DATE = new Date(2026, 9, 23); // 23 Oct 2026
+const MASTERY = 10;
+
+const MESES = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+function addDays(d, n){ const r = new Date(d); r.setDate(r.getDate()+n); return r; }
+function fmtDate(d){ return d.getDate() + " " + MESES[d.getMonth()]; }
+function dateKeyDiff(a,b){ return Math.round((b.setHours(0,0,0,0) - a.setHours(0,0,0,0)) / 86400000); }
+
+function getBatch(dayNum){
+  const start = (dayNum-1)*BATCH_SIZE;
+  return KANJI.slice(start, start+BATCH_SIZE);
+}
+
+/* ---------- STATE ---------- */
+let progress = {}; // { day1: {"日":7, "一":10, ...}, ... }
+let selectedDay = 1;
+let drillQueue = [];
+let drillIndex = 0;
+let flipped = false;
+let storageOk = true;
+
+async function loadProgress(){
+  try{
+    const res = await window.storage.get('kanji-marathon-progress');
+    if(res && res.value){ progress = JSON.parse(res.value); }
+  }catch(e){ /* no data yet, or storage unavailable */ }
+}
+async function saveProgress(){
+  try{
+    await window.storage.set('kanji-marathon-progress', JSON.stringify(progress));
+  }catch(e){ storageOk = false; }
+}
+
+function dayKey(n){ return 'day'+n; }
+function getDayProgress(n){ return progress[dayKey(n)] || {}; }
+function dayMasteredCount(n){
+  const p = getDayProgress(n);
+  const batch = getBatch(n);
+  return batch.filter(row => (p[row[0]]||0) >= MASTERY).length;
+}
+function dayIsDone(n){ return dayMasteredCount(n) === getBatch(n).length; }
+
+/* ---------- RENDER: header / strip ---------- */
+function renderHeader(){
+  document.getElementById('stripTitle').textContent = TOTAL_DAYS + ' dias · ' + KANJI.length + ' kanji (N4 + N3)';
+  const today = new Date();
+  const diff = Math.ceil((TRIP_DATE - today) / 86400000);
+  document.getElementById('countdownNum').textContent = diff >= 0 ? diff : 0;
+
+  let totalMastered = 0;
+  KANJI.forEach((row, idx) => {
+    const d = Math.floor(idx/BATCH_SIZE)+1;
+    const p = getDayProgress(d);
+    if((p[row[0]]||0) >= MASTERY) totalMastered++;
+  });
+  const pct = Math.round(totalMastered / KANJI.length * 100);
+  document.getElementById('overallProgress').textContent = pct + '% concluído (' + totalMastered + '/' + KANJI.length + ')';
+}
+
+function todayDayNumber(){
+  const today = new Date();
+  const diff = dateKeyDiff(new Date(START_DATE), today) + 1;
+  return Math.min(Math.max(diff,1), TOTAL_DAYS);
+}
+
+function renderStrip(){
+  const strip = document.getElementById('dayStrip');
+  strip.innerHTML = '';
+  const tDay = todayDayNumber();
+  for(let n=1; n<=TOTAL_DAYS; n++){
+    const chip = document.createElement('div');
+    chip.className = 'day-chip'
+      + (n===selectedDay ? ' selected':'')
+      + (n===tDay ? ' today':'')
+      + (dayIsDone(n) ? ' done':'');
+    chip.innerHTML = '<div class="n">Dia '+n+'</div>';
+    chip.addEventListener('click', ()=>{ selectedDay = n; renderAll(); });
+    strip.appendChild(chip);
+  }
+}
+
+/* ---------- RENDER: panel ---------- */
+function renderPanel(){
+  const batch = getBatch(selectedDay);
+  document.getElementById('panelTitle').textContent = 'Dia ' + selectedDay;
+
+  const mastered = dayMasteredCount(selectedDay);
+  document.getElementById('dayProgressFill').style.width = (mastered/batch.length*100)+'%';
+  document.getElementById('dayProgressNum').textContent = mastered + '/' + batch.length + ' dominados';
+
+  const grid = document.getElementById('tileGrid');
+  grid.innerHTML = '';
+  const p = getDayProgress(selectedDay);
+  batch.forEach(row => {
+    const count = p[row[0]] || 0;
+    const tile = document.createElement('div');
+    tile.className = 'tile' + (count>=MASTERY ? ' mastered':'');
+    tile.innerHTML = row[0] + (count>0 && count<MASTERY ? '<div class="mark">'+count+'/10</div>' : '');
+    grid.appendChild(tile);
+  });
+
+  const startBtn = document.getElementById('startBtn');
+  startBtn.textContent = mastered===batch.length ? 'Revisar novamente' : 'Iniciar treino';
+}
+
+function renderAll(){
+  renderHeader();
+  renderStrip();
+  renderPanel();
+}
+
+/* ---------- DRILL ---------- */
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function startDrill(){
+  const batch = getBatch(selectedDay);
+  const p = getDayProgress(selectedDay);
+  drillQueue = shuffle(batch.filter(row => (p[row[0]]||0) < MASTERY));
+  if(drillQueue.length===0){ drillQueue = shuffle(batch); }
+  drillIndex = 0;
+  flipped = false;
+  document.getElementById('overlay').classList.add('active');
+  renderDrill();
+}
+
+function currentDrillCount(){
+  const p = getDayProgress(selectedDay);
+  const row = drillQueue[drillIndex];
+  return p[row[0]] || 0;
+}
+
+function renderDrill(){
+  const box = document.getElementById('drillBox');
+  if(drillQueue.length===0){
+    box.innerHTML =
+      '<div class="done-screen">'
+        +'<div class="glyph">修</div>'
+        +'<h3>Dia '+selectedDay+' dominado!</h3>'
+        +'<p>Todos os 10 kanji de hoje bateram 10 acertos.</p>'
+        +'<button class="btn" id="drillCloseBtn">Voltar</button>'
+      +'</div>';
+    document.getElementById('drillCloseBtn').addEventListener('click', closeDrill);
+    return;
+  }
+  const row = drillQueue[drillIndex];
+  const count = currentDrillCount();
+  const meanings = row[1], on = row[2], kun = row[3];
+
+  let dots = '';
+  for(let i=0;i<MASTERY;i++){ dots += '<div class="dot'+(i<count?' filled':'')+'"></div>'; }
+
+  box.innerHTML =
+    '<div class="drill-top">'
+      +'<span class="lbl">Dia '+selectedDay+' · restam '+drillQueue.length+'</span>'
+      +'<button class="close-x" id="closeX">fechar ✕</button>'
+    +'</div>'
+    +'<div class="dots">'+dots+'</div>'
+    +'<div class="flip-scene"><div class="flip-card" id="flipCard">'
+      +'<div class="face front"><div class="k">'+row[0]+'</div><div class="tap">toque para virar</div></div>'
+      +'<div class="face back">'
+        +'<div class="meaning">'+meanings+'</div>'
+        +(on ? '<div class="reading-row"><b>ON</b>'+on+'</div>' : '')
+        +(kun ? '<div class="reading-row"><b>KUN</b>'+kun+'</div>' : '')
+      +'</div>'
+    +'</div></div>'
+    +'<div class="answer-row">'
+      +'<button class="btn wrong" id="wrongBtn">Errei</button>'
+      +'<button class="btn right" id="rightBtn">Acertei</button>'
+    +'</div>'
+    +'<div class="queue-note">Vire o card, tente lembrar antes de responder.</div>';
+
+  const card = document.getElementById('flipCard');
+  card.classList.toggle('flipped', flipped);
+  card.addEventListener('click', ()=>{ flipped = !flipped; card.classList.toggle('flipped', flipped); });
+  document.getElementById('closeX').addEventListener('click', closeDrill);
+  document.getElementById('wrongBtn').addEventListener('click', ()=>answer(false));
+  document.getElementById('rightBtn').addEventListener('click', ()=>answer(true));
+}
+
+function answer(correct){
+  const row = drillQueue[drillIndex];
+  const k = row[0];
+  if(!progress[dayKey(selectedDay)]) progress[dayKey(selectedDay)] = {};
+  const p = progress[dayKey(selectedDay)];
+  let count = p[k] || 0;
+  if(correct){ count = Math.min(MASTERY, count+1); }
+  p[k] = count;
+  saveProgress();
+
+  // remove from queue if mastered, else send to back of queue
+  drillQueue.splice(drillIndex,1);
+  if(count < MASTERY){
+    const insertAt = Math.min(drillQueue.length, 2 + Math.floor(Math.random()*2));
+    drillQueue.splice(insertAt, 0, row);
+  }
+  if(drillIndex >= drillQueue.length) drillIndex = 0;
+  flipped = false;
+  renderDrill();
+  renderStrip();
+}
+
+function closeDrill(){
+  document.getElementById('overlay').classList.remove('active');
+  renderAll();
+}
+
+/* ---------- INIT ---------- */
+document.getElementById('startBtn').addEventListener('click', startDrill);
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  if(confirm('Isso vai apagar todo o progresso salvo. Continuar?')){
+    progress = {};
+    await saveProgress();
+    renderAll();
+  }
+});
+
+(async function init(){
+  await loadProgress();
+  selectedDay = todayDayNumber();
+  renderAll();
+})();
+</script>
+</body>
+</html>
